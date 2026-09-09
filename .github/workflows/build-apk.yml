@@ -1,4 +1,4 @@
-name: Build ENA CI Prépa APK V5 FIXED
+name: Build ENA CI Prépa APK V5 FIXED2
 
 on:
   workflow_dispatch:
@@ -22,9 +22,9 @@ jobs:
       - name: Find and extract V5 project
         shell: bash
         run: |
-          ZIP=$(find . -maxdepth 2 -type f -name 'ENA_CI_PREPA_V5_FIXED.zip' | head -n 1)
+          ZIP=$(find . -maxdepth 2 -type f -name 'ENA_CI_PREPA_V5_FIXED2.zip' | head -n 1)
           if [ -z "$ZIP" ]; then
-            echo "ENA_CI_PREPA_V5_FIXED.zip introuvable"
+            echo "ENA_CI_PREPA_V5_FIXED2.zip introuvable"
             exit 1
           fi
           mkdir -p project
@@ -42,5 +42,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ENA-CI-PREPA-V5-FIXED-APK
+          name: ENA-CI-PREPA-V5-FIXED2-APK
           path: project/app/build/outputs/apk/debug/app-debug.apk
