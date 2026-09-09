@@ -27,7 +27,7 @@ jobs:
       - name: Décompresser le projet V4
         run: |
           mkdir project
-          unzip ENA_CI_PREPA_V4_GITHUB.zip -d project
+          unzip ENA_CI_PREPA_V4_FIXED.zip -d project
 
       - name: Construire l'APK
         working-directory: project
