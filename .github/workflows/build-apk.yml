@@ -1,4 +1,24 @@
-name: Build ENA CI Prépa APK V5
+from pathlib import Path
+import zipfile, shutil
+
+src = Path("/mnt/data/ENA_CI_PREPA_V5_GITHUB.zip")
+work = Path("/mnt/data/ENA_CI_PREPA_V5_FIXED")
+if work.exists():
+    shutil.rmtree(work)
+work.mkdir()
+
+with zipfile.ZipFile(src) as z:
+    z.extractall(work)
+
+# Remove the unnecessary AndroidX dependency that can introduce duplicate classes.
+app_gradle = work / "app" / "build.gradle"
+text = app_gradle.read_text(encoding="utf-8")
+text = text.replace("\ndependencies {\n    implementation 'androidx.appcompat:appcompat:1.7.0'\n}\n", "\n")
+app_gradle.write_text(text, encoding="utf-8")
+
+# Pin a Gradle version compatible with Android Gradle Plugin 8.6.1.
+workflow = work / ".github" / "workflows" / "build-apk.yml"
+workflow.write_text("""name: Build ENA CI Prépa APK V5 FIXED
 
 on:
   workflow_dispatch:
@@ -8,7 +28,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,16 +41,18 @@ jobs:
       - name: Find and extract V5 project
         shell: bash
         run: |
-          ZIP=$(find . -maxdepth 2 -type f -name 'ENA_CI_PREPA_V5_GITHUB.zip' | head -n 1)
+          ZIP=$(find . -maxdepth 2 -type f -name 'ENA_CI_PREPA_V5_FIXED.zip' | head -n 1)
           if [ -z "$ZIP" ]; then
-            echo "ENA_CI_PREPA_V5_GITHUB.zip introuvable"
+            echo "ENA_CI_PREPA_V5_FIXED.zip introuvable"
             exit 1
           fi
           mkdir -p project
           unzip -q "$ZIP" -d project
 
-      - name: Set up Gradle
+      - name: Set up Gradle 8.10.2
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
 
       - name: Build debug APK
         working-directory: project
@@ -40,5 +61,25 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ENA-CI-PREPA-V5-APK
+          name: ENA-CI-PREPA-V5-FIXED-APK
           path: project/app/build/outputs/apk/debug/app-debug.apk
+""", encoding="utf-8")
+
+(work / "README.md").write_text("""# ENA CI Prépa V5 FIXED
+
+Version V5 corrigée pour éviter les conflits de classes.
+- Dépendance AndroidX AppCompat supprimée (l'application utilise Activity/WebView natifs).
+- Gradle 8.10.2 utilisé avec Android Gradle Plugin 8.6.1.
+- QCM, corrections, examen blanc, coaching oral et progression locale conservés.
+""", encoding="utf-8")
+
+out = Path("/mnt/data/ENA_CI_PREPA_V5_FIXED.zip")
+if out.exists():
+    out.unlink()
+with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+    for p in work.rglob("*"):
+        if p.is_file():
+            z.write(p, p.relative_to(work))
+
+print(f"Nouvelle archive corrigée créée : {out}")
+print(f"Taille : {out.stat().st_size/1024:.1f} Ko")
