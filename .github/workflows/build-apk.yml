@@ -35,12 +35,11 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
-      - name: Build debug APK
-        working-directory: project
+        - name: Build debug APK
+        working-directory: project/ENA_CI_PREPA_V5_FIXED2
         run: gradle :app:assembleDebug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
+        uses: actions/upload-artifacd/outpu      with:
           name: ENA-CI-PREPA-V5-FIXED2-APK
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+              path: project/ENA_CI_PREPA_V5_FIXED2/app/build/outputs/apk/debug/app-debug.apk
