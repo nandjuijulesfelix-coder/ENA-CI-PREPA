@@ -1,17 +1,17 @@
-name: Build ENA CI Prépa APK V5 FIXED2
+name: Build ENA CI Prépa V6
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Télécharger le dépôt
+      - name: Télécharger le code
         uses: actions/checkout@v4
 
       - name: Installer Java 17
@@ -20,27 +20,16 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Décompresser le projet
-        shell: bash
-        run: |
-          mkdir -p project
-          unzip -q ENA_CI_PREPA_V5_FIXED2.zip -d project
-
       - name: Installer Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
 
       - name: Construire l'APK
-        shell: bash
-        run: |
-          PROJECT_DIR=$(find project -name settings.gradle -type f -printf '%h\n' | head -n 1)
-          echo "Projet trouvé dans : $PROJECT_DIR"
-          cd "$PROJECT_DIR"
-          gradle :app:assembleDebug
+        run: gradle :app:assembleDebug
 
-      - name: Envoyer l'APK
+      - name: Publier l'APK
         uses: actions/upload-artifact@v4
         with:
-          name: ENA-CI-PREPA-V5-FIXED2-APK
-          path: project/**/app/build/outputs/apk/debug/app-debug.apk
+          name: ENA-CI-PREPA-V6-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
